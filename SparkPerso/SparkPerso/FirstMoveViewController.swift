@@ -116,9 +116,9 @@ class FirstMoveViewController: UIViewController {
         print("down ")
 //        sendCommand(Movement(value: -commonValue, type: .down))
         
-        if let mySpark = DJISDKManager.product() as? DJIAircraft {
-            mySpark.mobileRemoteController?.leftStickVertical = -0.5
-        }
+//        if let mySpark = DJISDKManager.product() as? DJIAircraft {
+//            mySpark.mobileRemoteController?.leftStickVertical = -0.5
+//        }
     }
     
     
@@ -126,9 +126,9 @@ class FirstMoveViewController: UIViewController {
         print("up ")
 //        sendCommand(Movement(value: commonValue, type: .up))
         
-        if let mySpark = DJISDKManager.product() as? DJIAircraft {
-            mySpark.mobileRemoteController?.leftStickVertical = 0.5
-        }
+//        if let mySpark = DJISDKManager.product() as? DJIAircraft {
+//            mySpark.mobileRemoteController?.leftStickVertical = 0.5
+//        }
 
     }
     
