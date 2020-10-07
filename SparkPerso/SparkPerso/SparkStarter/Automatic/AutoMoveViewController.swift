@@ -52,9 +52,9 @@ class AutoMoveViewController: UIViewController {
         MovingManager.instance.isTesting = false
         MovingManager.instance.restart()
         let speed:CGFloat = 0.5
-        MovingManager.instance.appendMouvement(mouvement: Movement(direction: .top, duration: 2.0, speed: speed))
+        MovingManager.instance.appendMouvement(mouvement: Movement(direction: .up, duration: 2.0, speed: speed))
         MovingManager.instance.appendMouvement(mouvement: Movement(direction: .right, duration: 2.0, speed: speed))
-        MovingManager.instance.appendMouvement(mouvement: Movement(direction: .top, duration: 2.0, speed: speed))
+        MovingManager.instance.appendMouvement(mouvement: Movement(direction: .up, duration: 2.0, speed: speed))
         MovingManager.instance.appendMouvement(mouvement: Movement(direction: .left, duration: 2.0, speed: speed))
         
         MovingManager.instance.play()

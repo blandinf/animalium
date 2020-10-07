@@ -14,18 +14,19 @@ struct Movement {
     var speed:CGFloat
     
     enum Direction:String,CaseIterable {
-        case top,back,left,right,topRight,topLeft,bottomRight,bottomLeft
+        case front, back, up, down,left,right,topRight,topLeft,bottomRight,bottomLeft
         
         func value() -> CGPoint {
             switch self {
-            case .top: return CGPoint(x: 0, y: 1)
-            case .back: return CGPoint(x: 0, y: -1)
-            case .left: return CGPoint(x: -1, y: 0)
-            case .right: return CGPoint(x: 1, y: 0)
-            case .topRight: return CGPoint(x: 1, y: 1)
-            case .topLeft: return CGPoint(x: -1, y: 1)
-            case .bottomRight: return CGPoint(x: 1, y: -1)
-            case .bottomLeft: return CGPoint(x: -1, y: -1)
+                case .up: return CGPoint(x: 0, y: 1)
+                case .down: return CGPoint(x: 0, y: -1)
+                case .left: return CGPoint(x: -1, y: 0)
+                case .right: return CGPoint(x: 1, y: 0)
+                case .topRight: return CGPoint(x: 1, y: 1)
+                case .topLeft: return CGPoint(x: -1, y: 1)
+                case .bottomRight: return CGPoint(x: 1, y: -1)
+                case .bottomLeft: return CGPoint(x: -1, y: -1)
+                default: return CGPoint()
             }
         }
     }

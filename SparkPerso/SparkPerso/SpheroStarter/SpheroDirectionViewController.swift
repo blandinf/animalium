@@ -35,13 +35,14 @@ class SpheroDirectionViewController: UIViewController {
             $0.setStabilization(state: SetStabilization.State.on)
             $0.setCollisionDetection(configuration: .enabled)
         }
-        SharedToyBox.instance.bolts.map{
+        
+        SharedToyBox.instance.bolts.map {
             $0.onCollisionDetected = { collisionData in
                 boltCollision.append(true)
                 DispatchQueue.main.sync {
                     if nbBolts == boltCollision.count {
                         print("Collision de 2 bolts")
-                    }else{
+                    } else {
                         delay(0.5) {
                             boltCollision = []
                         }
@@ -62,7 +63,7 @@ class SpheroDirectionViewController: UIViewController {
                 if let accelerometer = data.accelerometer {
                     if let acceleration = accelerometer.filteredAcceleration {
                         if let x = acceleration.x, let y = acceleration.y, let z = acceleration.z {
-                            let datasConverted = JoystickInterpreter.convert(x: x, y: y, heading: self.currentHeading)
+                            let datasConverted = JoystickSpheroInterpreter.convert(x: x, y: y, heading: self.currentHeading)
                             print(datasConverted)
                             if datasConverted.reverse {
                                 SharedToyBox.instance.bolts[1].roll(heading: datasConverted.currentHeading, speed: datasConverted.currentSpeed, rollType: .roll, direction: .reverse)
