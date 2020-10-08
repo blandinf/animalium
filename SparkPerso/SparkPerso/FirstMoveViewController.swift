@@ -13,23 +13,27 @@ class FirstMoveViewController: UIViewController {
     let spark = DJISDKManager.product() as? DJIAircraft
     
     var pos = (x: 0, y: 0)
+    var isAllowToMove = true
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if SharedToyBox.instance.bolts.count > 2 {
-            SharedToyBox.instance.bolts[2].sensorControl.enable(sensors: SensorMask.init(arrayLiteral: .accelerometer,.gyro))
-            SharedToyBox.instance.bolts[2].sensorControl.interval = 1
-            SharedToyBox.instance.bolts[2].setStabilization(state: SetStabilization.State.off)
-            SharedToyBox.instance.bolts[2].sensorControl.onDataReady = { data in
-                DispatchQueue.main.async { [self] in
-                    if let accelerometer = data.accelerometer {
-                        if let acceleration = accelerometer.filteredAcceleration {
-                            if let x = acceleration.x, let y = acceleration.y, let z = acceleration.z {
-                                let datasConverted = JoystickSparkInterpreter.convert(x: x, y: y, currentPos: self.pos)
-                                self.updatePosition(newX: datasConverted.newX, newY: datasConverted.newY, action: datasConverted.action)
-                                print(datasConverted)
-                            }
+//        if SharedToyBox.instance.bolts.count > 2 {
+//
+//        }
+        
+        SharedToyBox.instance.bolts[0].setFrontLed(color: .green)
+        SharedToyBox.instance.bolts[0].sensorControl.enable(sensors: SensorMask.init(arrayLiteral: .accelerometer,.gyro))
+        SharedToyBox.instance.bolts[0].sensorControl.interval = 1
+        SharedToyBox.instance.bolts[0].setStabilization(state: SetStabilization.State.off)
+        SharedToyBox.instance.bolts[0].sensorControl.onDataReady = { data in
+            DispatchQueue.main.async { [self] in
+                if let accelerometer = data.accelerometer {
+                    if let acceleration = accelerometer.filteredAcceleration {
+                        if let x = acceleration.x, let y = acceleration.y, let z = acceleration.z {
+                            let datasConverted = JoystickSparkInterpreter.convert(x: x, y: y, currentPos: self.pos)
+                            self.updatePosition(newX: datasConverted.newX, newY: datasConverted.newY, action: datasConverted.action)
+//                            print(datasConverted)
                         }
                     }
                 }
@@ -38,28 +42,42 @@ class FirstMoveViewController: UIViewController {
     }
     
     func updatePosition (newX: Int, newY: Int, action: Movement.Direction) {
-        if newY == 2 || newX == 2 || newY == -2 || newX == -2 {
-            return
-        }
-        pos = (newX, newY)
-        
-        if let mySpark = spark {
-            switch action {
-                case Movement.Direction.front:
-                    mySpark.mobileRemoteController?.rightStickVertical = 1
-                case Movement.Direction.back:
-                    mySpark.mobileRemoteController?.rightStickVertical = -1
-                case Movement.Direction.left:
-                    mySpark.mobileRemoteController?.rightStickHorizontal = 1
-                case Movement.Direction.right:
-                    mySpark.mobileRemoteController?.rightStickHorizontal = -1
-                default:
-                    return
+        if (isAllowToMove) {
+            if newY == 2 || newX == 2 || newY == -2 || newX == -2 {
+                print("return")
+                return
             }
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            self.stop()
+            
+            if pos != (newX, newY) {
+                pos = (newX, newY)
+                print("pos \(pos)")
+                isAllowToMove = false
+                
+                if let mySpark = spark {
+                    switch action {
+                        case Movement.Direction.front:
+                            mySpark.mobileRemoteController?.rightStickVertical = 0.2
+                        case Movement.Direction.back:
+                            mySpark.mobileRemoteController?.rightStickVertical = -0.2
+                        case Movement.Direction.left:
+                            mySpark.mobileRemoteController?.rightStickHorizontal = -0.2
+                        case Movement.Direction.right:
+                            mySpark.mobileRemoteController?.rightStickHorizontal = 0.2
+                        case Movement.Direction.nothing:
+                            self.stop()
+                        default:
+                            return
+                    }
+                }
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
+                    self.stop()
+                }
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                    self.isAllowToMove = true
+                }
+            }
         }
     }
     
@@ -79,14 +97,14 @@ class FirstMoveViewController: UIViewController {
     
     @IBAction func left(_ sender: UIButton) {
         print("left")
-//        updatePosition(newX: pos.x-1, newY: pos.y, action: MovementType.left)
+//        updatePosition(newX: pos.x-1, newY: pos.y, action: Movement.Direction.left)
 //        if let mySpark = DJISDKManager.product() as? DJIAircraft {
 //            mySpark.mobileRemoteController?.rightStickHorizontal = -0.5
 //        }
     }
     @IBAction func right(_ sender: UIButton) {
         print("right")
-//        updatePosition(newX: pos.x+1, newY: pos.y, action: MovementType.right)
+//        updatePosition(newX: pos.x+1, newY: pos.y, action: Movement.Direction.right)
 //        if let mySpark = DJISDKManager.product() as? DJIAircraft {
 //            mySpark.mobileRemoteController?.rightStickHorizontal = 0.5
 //        }
@@ -95,7 +113,7 @@ class FirstMoveViewController: UIViewController {
     @IBAction func backward(_ sender: UIButton) {
         print("backward")
 //        sendCommand(Movement(value: -commonValue, type: .backward))
-//        updatePosition(newX: pos.x, newY: pos.y-1, action: MovementType.backward)
+//        updatePosition(newX: pos.x, newY: pos.y-1, action: Movement.Direction.back)
 //        if let mySpark = DJISDKManager.product() as? DJIAircraft {
 //            mySpark.mobileRemoteController?.rightStickVertical = -0.5
 //        }
@@ -103,7 +121,7 @@ class FirstMoveViewController: UIViewController {
     
     @IBAction func forward(_ sender: UIButton) {
 //        print("forward")
-//        updatePosition(newX: pos.x, newY: pos.y+1, action: MovementType.forward)
+//        updatePosition(newX: pos.x, newY: pos.y+1, action: Movement.Direction.front)
 //        if let mySpark = DJISDKManager.product() as? DJIAircraft {
 //            mySpark.mobileRemoteController?.rightStickVertical = 0.5
 //        }

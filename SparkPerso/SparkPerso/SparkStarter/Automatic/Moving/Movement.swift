@@ -14,7 +14,7 @@ struct Movement {
     var speed:CGFloat
     
     enum Direction:String,CaseIterable {
-        case front, back, up, down,left,right,topRight,topLeft,bottomRight,bottomLeft
+        case front, back, up, down,left,right,topRight,topLeft,bottomRight,bottomLeft, nothing
         
         func value() -> CGPoint {
             switch self {
@@ -26,6 +26,7 @@ struct Movement {
                 case .topLeft: return CGPoint(x: -1, y: 1)
                 case .bottomRight: return CGPoint(x: 1, y: -1)
                 case .bottomLeft: return CGPoint(x: -1, y: -1)
+                case .nothing: return CGPoint()
                 default: return CGPoint()
             }
         }
