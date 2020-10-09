@@ -25,20 +25,37 @@ class CameraViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
-        
+
     }
+    
+    override public var shouldAutorotate: Bool {
+      return false
+    }
+    override public var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+      return .landscapeRight
+    }
+    override public var preferredInterfaceOrientationForPresentation: UIInterfaceOrientation {
+      return .landscapeRight
+    }
+  
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         if let _ = DJISDKManager.product() {
             if let camera = self.getCamera(){
                 camera.delegate = self
+//                camera.setOrientation(.landscape, withCompletion: nil)
+//                camera.setDigitalZoomFactor(.0)
+                print("supported \(camera.isDigitalZoomSupported())")
                 self.setupVideoPreview()
             }
             
             GimbalManager.shared.setup(withDuration: 1.0, defaultPitch: -28.0)
+            GimbalManager.shared.lookUnder()
             
+            view.backgroundColor = .green
+            cameraView.backgroundColor = .red
+            cameraView.pinEdges(to: view)
         }
     }
 
@@ -127,12 +144,14 @@ class CameraViewController: UIViewController {
         return nil
     }
     
+    
     func setupVideoPreview() {
         
         // Prev1 est de type VideoPreviewer
         // Camera view est une view liée depuis le storyboard
         
         prev1?.setView(self.cameraView)
+//        self.cameraView.pinEdges(to: view)
         /*
         // ...
         // plus loin
