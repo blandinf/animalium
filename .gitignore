@@ -1,9 +1,6 @@
 .DS_Store
 .AppleDouble
 .LSOverride
-*.xcodeproj
-.build/*
-Packages/*
 
 # Icon must end with two \r
 Icon
