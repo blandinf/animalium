@@ -31,7 +31,6 @@ class JoystickSpheroInterpreter {
         if (!xIsEmpty && yIsEmpty) {
             if x > Steps.low.rawValue {
                 // gauche
-                print("gauche")
                 currentHeading = heading + 270
             } else {
                 // droite
@@ -39,7 +38,6 @@ class JoystickSpheroInterpreter {
             }
         } else if (!yIsEmpty && xIsEmpty) {
             if y > Steps.low.rawValue {
-//                reverse = true
                 currentHeading = heading + 180
             } else {
                 currentHeading = 0
@@ -72,7 +70,7 @@ class JoystickSpheroInterpreter {
     
 
     static func handleSpeed (maxValue: Double) -> Double {
-        let COEFF = 120.0
+        let COEFF = 150.0
         if maxValue > Steps.low.rawValue && maxValue < Steps.medium.rawValue {
             return Steps.low.rawValue * COEFF
         } else if maxValue > Steps.medium.rawValue && maxValue < Steps.high.rawValue {
