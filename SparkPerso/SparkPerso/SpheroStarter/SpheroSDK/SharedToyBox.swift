@@ -17,6 +17,7 @@ class SharedToyBox {
     let box = ToyBox()
     var boltsNames = [String]()
     var bolts:[BoltToy] = []
+    let boltsDetails = Bundle.main.decode([BoltDetails].self, from: "bolt_details.json")
     
     var bolt:BoltToy? {
         get {
@@ -25,20 +26,29 @@ class SharedToyBox {
         }
     }
     
-    var joystick:BoltToy? {
-        get {
-            return bolts.first(where: { $0.identifier == UUID(uuidString: "A097AC02-E3F0-3288-75D7-28DC9D6A7461")})
-        }
-    }
-    
-    var animal:BoltToy? {
-        get {
-            return bolts.first(where: { $0.identifier != UUID(uuidString: "A097AC02-E3F0-3288-75D7-28DC9D6A7461")})
-        }
-    }
-    
     init() {
         box.addListener(self)
+    }
+    
+    func getBoltDetailsByIdentifier(identifier: UUID) -> BoltDetails? {
+        return boltsDetails.first(where: { $0.UUID == identifier })
+    }
+    
+    func getBoltByIdentifier(identifier: UUID) -> BoltToy? {
+        return bolts.first(where: {$0.identifier == identifier})
+    }
+    
+    func getBoltDetailsIdentifierByType(type: String) -> UUID? {
+        return boltsDetails.first(where: { $0.type == type })?.UUID
+    }
+    
+    func getBoltLinked(link: Int, clan: String? = nil) -> BoltDetails? {
+        if let test = clan {
+            return boltsDetails.first(where: { $0.link == link && $0.type != "joystick" && $0.clan == test })
+        } else {
+            return boltsDetails.first(where: { $0.link == link && $0.type != "joystick" })
+        }
+        
     }
     
     func searchForBoltsNamed(_ names:[String], doneCallBack:@escaping (Error?)->()) {
@@ -66,6 +76,7 @@ extension SharedToyBox:ToyBoxListener{
         }else{
             if boltsNames.contains(descriptor.name ?? "") {
                 let bolt = BoltToy(peripheral: descriptor.peripheral, owner: toyBox)
+                print("identifier \(bolt.identifier)")
                 bolts.append(bolt)
                 toyBox.connect(toy: bolt)
             }
@@ -75,6 +86,7 @@ extension SharedToyBox:ToyBoxListener{
     
     func toyBox(_ toyBox: ToyBox, readied toy: Toy) {
         print("readied")
+        
         if let b = toy as? BoltToy {
             print(b.peripheral?.name ?? "")
             if let i = self.bolts.firstIndex(where: { (item) -> Bool in

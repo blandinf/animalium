@@ -14,6 +14,7 @@ class BoltToy: SpheroV2Toy {
     private let maxScrollingTextLength = 26
     private let maxScrollingTextSpeed = 30
     private let maxPixelValue = 7
+    var canRoll = true
     
     override class var descriptor: String { return "SB-" }
     

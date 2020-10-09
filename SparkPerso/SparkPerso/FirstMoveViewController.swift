@@ -18,10 +18,6 @@ class FirstMoveViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-//        if SharedToyBox.instance.bolts.count > 2 {
-//
-//        }
-        
         SharedToyBox.instance.bolts[0].setFrontLed(color: .green)
         SharedToyBox.instance.bolts[0].sensorControl.enable(sensors: SensorMask.init(arrayLiteral: .accelerometer,.gyro))
         SharedToyBox.instance.bolts[0].sensorControl.interval = 1
@@ -30,10 +26,9 @@ class FirstMoveViewController: UIViewController {
             DispatchQueue.main.async { [self] in
                 if let accelerometer = data.accelerometer {
                     if let acceleration = accelerometer.filteredAcceleration {
-                        if let x = acceleration.x, let y = acceleration.y, let z = acceleration.z {
+                        if let x = acceleration.x, let y = acceleration.y {
                             let datasConverted = JoystickSparkInterpreter.convert(x: x, y: y, currentPos: self.pos)
                             self.updatePosition(newX: datasConverted.newX, newY: datasConverted.newY, action: datasConverted.action)
-//                            print(datasConverted)
                         }
                     }
                 }
@@ -44,13 +39,11 @@ class FirstMoveViewController: UIViewController {
     func updatePosition (newX: Int, newY: Int, action: Movement.Direction) {
         if (isAllowToMove) {
             if newY == 2 || newX == 2 || newY == -2 || newX == -2 {
-                print("return")
                 return
             }
             
             if pos != (newX, newY) {
                 pos = (newX, newY)
-                print("pos \(pos)")
                 isAllowToMove = false
                 
                 if let mySpark = spark {

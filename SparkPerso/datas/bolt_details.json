@@ -1,0 +1,30 @@
+[
+    {
+        "UUID": "9513AFC3-C156-3810-7E7C-63C48706DDC8",
+        "type": "joystick",
+        "clan": "animals",
+        "activity": "cow",
+        "link": 1
+    },
+    {
+        "UUID": "AD6243DE-D8B2-D46F-2C49-F1B906DB2393",
+        "type": "joystick",
+        "clan": "enemy",
+        "activity": "cow",
+        "link": 2
+    },
+    {
+        "UUID": "7A2F0CCC-E33F-A94D-E5FE-7189B8A76F5B",
+        "type": "animal",
+        "clan": "animals",
+        "activity": "cow",
+        "link": 1
+    },
+    {
+        "UUID": "D5C2A3DF-6C8A-3344-2D8B-77405F6C3A9D",
+        "type": "boat",
+        "clan": "enemy",
+        "activity": "cow",
+        "link": 2
+    },
+]

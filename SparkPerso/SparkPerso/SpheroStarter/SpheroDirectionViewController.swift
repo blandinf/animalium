@@ -28,48 +28,69 @@ class SpheroDirectionViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let nbBolts = SharedToyBox.instance.bolts.count
-        var boltCollision = [Bool]()
+        var boltCollision = [UUID]()
         
-        SharedToyBox.instance.bolts.map{
-            $0.setStabilization(state: SetStabilization.State.on)
-            $0.setCollisionDetection(configuration: .enabled)
-        }
-        
-        SharedToyBox.instance.bolts.map {
-            $0.onCollisionDetected = { collisionData in
-                boltCollision.append(true)
-                DispatchQueue.main.sync {
-                    if nbBolts == boltCollision.count {
-                        print("Collision de 2 bolts")
+        for bolt in SharedToyBox.instance.bolts {
+            if var boltDetails = SharedToyBox.instance.getBoltDetailsByIdentifier(identifier: bolt.identifier) {
+                if (boltDetails.type == "joystick") {
+                    if (boltDetails.clan == "enemy") {
+                        bolt.setFrontLed(color: .red)
                     } else {
-                        delay(0.5) {
-                            boltCollision = []
+                        bolt.setFrontLed(color: .green)
+                    }
+                    bolt.sensorControl.enable(sensors: SensorMask.init(arrayLiteral: .accelerometer,.gyro))
+                    bolt.sensorControl.interval = 1
+                    bolt.setStabilization(state: SetStabilization.State.off)
+                    
+                    if let boltDetailsToRoll = SharedToyBox.instance.getBoltLinked(link: boltDetails.link),
+                       let boltToRoll = SharedToyBox.instance.getBoltByIdentifier(identifier: boltDetailsToRoll.UUID) {
+                        bolt.sensorControl.onDataReady = { data in
+                            DispatchQueue.main.async {
+                                if let accelerometer = data.accelerometer {
+                                    if let acceleration = accelerometer.filteredAcceleration {
+                                        if let x = acceleration.x, let y = acceleration.y {
+                                            let datasConverted = JoystickSpheroInterpreter.convert(x: x, y: y, heading: self.currentHeading)
+                                            print("canRoll \(boltToRoll.canRoll)")
+                                            if (boltToRoll.canRoll == true) {
+                                                if datasConverted.reverse {
+                                                    boltToRoll.roll(heading: datasConverted.currentHeading, speed: datasConverted.currentSpeed, rollType: .roll, direction: .reverse)
+                                                } else {
+                                                    boltToRoll.roll(heading: datasConverted.currentHeading, speed: datasConverted.currentSpeed)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
-                    self.collisionLabel.text = "Aïe!!!"
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                        self.collisionLabel.text = ""
-                    }
-                }
-            }
-        }
-        
-        SharedToyBox.instance.bolts[0].sensorControl.enable(sensors: SensorMask.init(arrayLiteral: .accelerometer,.gyro))
-        SharedToyBox.instance.bolts[0].sensorControl.interval = 1
-        SharedToyBox.instance.bolts[0].setStabilization(state: SetStabilization.State.off)
-        SharedToyBox.instance.bolts[0].sensorControl.onDataReady = { data in
-            DispatchQueue.main.async {
-                if let accelerometer = data.accelerometer {
-                    if let acceleration = accelerometer.filteredAcceleration {
-                        if let x = acceleration.x, let y = acceleration.y, let z = acceleration.z {
-                            let datasConverted = JoystickSpheroInterpreter.convert(x: x, y: y, heading: self.currentHeading)
-                            print(datasConverted)
-                            if datasConverted.reverse {
-                                SharedToyBox.instance.bolts[1].roll(heading: datasConverted.currentHeading, speed: datasConverted.currentSpeed, rollType: .roll, direction: .reverse)
-                            } else {
-                                SharedToyBox.instance.bolts[1].roll(heading: datasConverted.currentHeading, speed: datasConverted.currentSpeed)
+                } else if (boltDetails.type == "animal" || boltDetails.type == "boat") {
+                    bolt.setStabilization(state: SetStabilization.State.on)
+                    bolt.setCollisionDetection(configuration: .enabled)
+                    
+                    let boatUUID = SharedToyBox.instance.getBoltDetailsIdentifierByType(type: "boat")
+                    
+                    if (boltDetails.type == "animal") {
+                        bolt.setFrontLed(color: .blue)
+                        bolt.onCollisionDetected = { collisionData in
+                            print("collision \(boltDetails.type) \(boltDetails.link)")
+                            boltCollision.append(bolt.identifier)
+                            DispatchQueue.main.sync {
+                                if let boatIdentifier = boatUUID {
+                                    if boltCollision.contains(boatIdentifier) {
+                                        print("collision avec le bateau")
+                                        bolt.canRoll = false
+                                        delay(0.5) {
+                                            boltCollision = []
+                                        }
+                                    }
+                                }
                             }
+                        }
+                    } else {
+                        bolt.setFrontLed(color: .orange)
+                        bolt.onCollisionDetected = { collisionData in
+                            boltCollision.append(bolt.identifier)
                         }
                     }
                 }
@@ -119,16 +140,29 @@ class SpheroDirectionViewController: UIViewController {
     }
     
     @IBAction func stopClicked(_ sender: Any) {
-        if SharedToyBox.instance.bolts.count == 2 {
-            SharedToyBox.instance.bolts[0].stopRoll(heading: currentHeading)
-            SharedToyBox.instance.bolts[1].stopRoll(heading: currentHeading)
-        } else {
-            SharedToyBox.instance.bolts[0].stopRoll(heading: currentHeading)
+        for bolt in SharedToyBox.instance.bolts {
+            bolt.canRoll = false
+            bolt.stopRoll(heading: currentHeading)
         }
 //        print("stop")
 //        SharedToyBox.instance.bolt?.stopRoll(heading: currentHeading)
     }
     
+    
+    @IBAction func stopFirstSphero(_ sender: UIButton) {
+        if let firstSpheroDetails = SharedToyBox.instance.getBoltLinked(link: 1, clan: "animals"),
+           let firstSphero = SharedToyBox.instance.getBoltByIdentifier(identifier: firstSpheroDetails.UUID) {
+            firstSphero.canRoll = false
+        }
+    }
+    
+    @IBAction func stopSecondSphero(_ sender: UIButton) {
+        if let secondSpheroDetails = SharedToyBox.instance.getBoltLinked(link: 2, clan: "animals"),
+           let secondSphero = SharedToyBox.instance.getBoltByIdentifier(identifier: secondSpheroDetails.UUID) {
+            print("sphero 2 stop")
+            secondSphero.canRoll = false
+        }
+    }
     /*
     // MARK: - Navigation
 
