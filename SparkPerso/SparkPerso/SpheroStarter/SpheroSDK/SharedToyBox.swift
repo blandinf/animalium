@@ -43,12 +43,15 @@ class SharedToyBox {
     }
     
     func getBoltLinked(link: Int, clan: String? = nil) -> BoltDetails? {
-        if let test = clan {
-            return boltsDetails.first(where: { $0.link == link && $0.type != "joystick" && $0.clan == test })
+        if let clanLinked = clan {
+            return boltsDetails.first(where: { $0.link == link && $0.type != "joystick" && $0.clan == clanLinked })
         } else {
             return boltsDetails.first(where: { $0.link == link && $0.type != "joystick" })
         }
-        
+    }
+    
+    func getBoltDetailsByTypeAndActivity(type: String, activity: String) -> BoltDetails? {
+        return boltsDetails.first(where: { $0.type == type && $0.activity == activity })
     }
     
     func searchForBoltsNamed(_ names:[String], doneCallBack:@escaping (Error?)->()) {

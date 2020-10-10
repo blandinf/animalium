@@ -18,17 +18,21 @@ class FirstMoveViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        SharedToyBox.instance.bolts[0].setFrontLed(color: .green)
-        SharedToyBox.instance.bolts[0].sensorControl.enable(sensors: SensorMask.init(arrayLiteral: .accelerometer,.gyro))
-        SharedToyBox.instance.bolts[0].sensorControl.interval = 1
-        SharedToyBox.instance.bolts[0].setStabilization(state: SetStabilization.State.off)
-        SharedToyBox.instance.bolts[0].sensorControl.onDataReady = { data in
-            DispatchQueue.main.async { [self] in
-                if let accelerometer = data.accelerometer {
-                    if let acceleration = accelerometer.filteredAcceleration {
-                        if let x = acceleration.x, let y = acceleration.y {
-                            let datasConverted = JoystickSparkInterpreter.convert(x: x, y: y, currentPos: self.pos)
-                            self.updatePosition(newX: datasConverted.newX, newY: datasConverted.newY, action: datasConverted.action)
+        if let joystickDrone = SharedToyBox.instance.getBoltDetailsByTypeAndActivity(type: "joystick", activity: "bird") {
+            if let joystick = SharedToyBox.instance.getBoltByIdentifier(identifier: joystickDrone.UUID) {
+                joystick.setFrontLed(color: .green)
+                joystick.sensorControl.enable(sensors: SensorMask.init(arrayLiteral: .accelerometer,.gyro))
+                joystick.sensorControl.interval = 1
+                joystick.setStabilization(state: SetStabilization.State.off)
+                joystick.sensorControl.onDataReady = { data in
+                    DispatchQueue.main.async { [self] in
+                        if let accelerometer = data.accelerometer {
+                            if let acceleration = accelerometer.filteredAcceleration {
+                                if let x = acceleration.x, let y = acceleration.y {
+                                    let datasConverted = JoystickSparkInterpreter.convert(x: x, y: y, currentPos: self.pos)
+                                    self.updatePosition(newX: datasConverted.newX, newY: datasConverted.newY, action: datasConverted.action)
+                                }
+                            }
                         }
                     }
                 }
@@ -44,6 +48,7 @@ class FirstMoveViewController: UIViewController {
             
             if pos != (newX, newY) {
                 pos = (newX, newY)
+                print(pos)
                 isAllowToMove = false
                 
                 if let mySpark = spark {
