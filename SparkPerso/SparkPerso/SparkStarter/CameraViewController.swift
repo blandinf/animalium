@@ -17,6 +17,8 @@ class CameraViewController: UIViewController {
     
     @IBOutlet weak var resultLabel: UILabel!
     
+    @IBOutlet weak var birdView: UIView!
+    
     let prev1 = VideoPreviewer()
     @IBOutlet weak var cameraView: UIView!
     
@@ -44,24 +46,35 @@ class CameraViewController: UIViewController {
         if let _ = DJISDKManager.product() {
             if let camera = self.getCamera(){
                 camera.delegate = self
-//                camera.setOrientation(.landscape, withCompletion: nil)
-//                camera.setDigitalZoomFactor(.0)
-                print("supported \(camera.isDigitalZoomSupported())")
                 self.setupVideoPreview()
             }
             
             GimbalManager.shared.setup(withDuration: 1.0, defaultPitch: -28.0)
             GimbalManager.shared.lookUnder()
-            
-            view.backgroundColor = .green
-            cameraView.backgroundColor = .red
+
             cameraView.pinEdges(to: view)
+            birdView.backgroundColor = .clear
+            
+            let h: CGFloat = cameraView.frame.size.height
+            let w: CGFloat = cameraView.frame.size.width
+            let scale: CGFloat = 3.5
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { // Change `2.0` to the desired number of seconds.
+                UIView.animate(withDuration: 2.0, delay: 0, options: [.curveEaseInOut], animations: {
+                    self.cameraView.transform = self.cameraView.transform.scaledBy(x: scale, y: scale)
+                    self.cameraView.center = CGPoint(x: w/scale/2, y: h/scale/2)
+                }, completion: { finish in })
+            }
+           
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) { // Change `2.0` to the desired number of seconds.
+                self.birdView.isHidden = false
+            }
         }
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
     @IBAction func lookFront(_ sender: Any) {
         GimbalManager.shared.lookFront()
