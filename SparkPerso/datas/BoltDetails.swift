@@ -13,5 +13,6 @@ struct BoltDetails: Codable {
     let type: String
     let clan: String
     let activity: String
+    let heading: Double
     let link: Int
 }
