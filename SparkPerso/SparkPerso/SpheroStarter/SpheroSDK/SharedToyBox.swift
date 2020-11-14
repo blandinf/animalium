@@ -79,6 +79,7 @@ extension SharedToyBox:ToyBoxListener{
         }else{
             if boltsNames.contains(descriptor.name ?? "") {
                 let bolt = BoltToy(peripheral: descriptor.peripheral, owner: toyBox)
+//                bolt.setStabilization(state: .off)
                 print("identifier \(bolt.identifier)")
                 bolts.append(bolt)
                 toyBox.connect(toy: bolt)
@@ -103,6 +104,35 @@ extension SharedToyBox:ToyBoxListener{
                     self.searchCallBack?(nil)
                 }
             }
+            
+            if let boltDetails = SharedToyBox.instance.getBoltDetailsByIdentifier(identifier: b.identifier) {
+                if boltDetails.activity == "cow" {
+                    if boltDetails.type == "joystick" {
+                        if boltDetails.clan == "enemy" {
+                            b.setBackLed(color: .red)
+                        } else if boltDetails.link == 1 {
+                            b.setBackLed(color: .green)
+                        } else {
+                            b.setBackLed(color: .blue)
+                        }
+                    } else {
+                        if boltDetails.type == "boat" {
+                            b.setFrontLed(color: .systemRed)
+                        } else if boltDetails.link == 1 {
+                            b.setFrontLed(color: .systemGreen)
+                        } else {
+                            b.setFrontLed(color: .systemBlue)
+                        }
+                    }
+                } else {
+                    if boltDetails.type == "joystick" {
+                        b.setBackLed(color: .orange)
+                    } else {
+                        b.setFrontLed(color: .darkGray)
+                    }
+                }
+            }
+            b.setStabilization(state: .off)
             //b.setMainLed(color: .clear)
             //b.setBackLed(color: .clear)
             //b.setFrontLed(color: .clear)
