@@ -9,16 +9,30 @@
 import UIKit
 import DJISDK
 import VideoPreviewer
+import AVFoundation
+
 //import ImageDetect
 
 class CameraViewController: UIViewController {
 
     @IBOutlet weak var extractedFrameImageView: UIImageView!
+    let spark = DJISDKManager.product() as? DJIAircraft
+    
+    var limitPos = (x: 0, y: 0)
+    var realPos = (x: 500, y: 500)
+    var isAllowToMove = true
+    var index = 1
+    var boltCollisions = [UUID]()
+    
+    @IBOutlet var akialoas: [UIImageView]!
+    
+    var player: AVAudioPlayer?
     
     @IBOutlet weak var resultLabel: UILabel!
+    @IBOutlet weak var flashImage: UIImageView!
     
-    @IBOutlet weak var birdView: UIView!
-    
+    @IBOutlet weak var flashView: UIView!
+    @IBOutlet weak var myScrollView: UIScrollView!
     let prev1 = VideoPreviewer()
     @IBOutlet weak var cameraView: UIView!
     
@@ -27,49 +41,217 @@ class CameraViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        guard let soundURL = Bundle.main.url(forResource: "picture", withExtension: "wav") else {
+            print("nok")
+            return
+        }
 
+        myScrollView.setValue(2.0, forKeyPath: "contentOffsetAnimationDuration")
+
+        do {
+            player = try AVAudioPlayer(contentsOf: soundURL)
+            guard let player = player else {
+                print("nok2")
+                return
+            }
+
+            print("player \(player)")
+            player.prepareToPlay()
+            
+            if let buzzerDetails = SharedToyBox.instance.getBoltDetailsByTypeAndActivity(type: "buzzer", activity: "bird") {
+                print(buzzerDetails)
+                if let buzzer = SharedToyBox.instance.getBoltByIdentifier(identifier: buzzerDetails.UUID) {
+                    print(buzzer)
+                    buzzer.setFrontLed(color: .orange)
+                    buzzer.sensorControl.enable(sensors: SensorMask.init(arrayLiteral: .accelerometer,.gyro))
+                    buzzer.sensorControl.interval = 1
+                    buzzer.setStabilization(state: SetStabilization.State.off)
+                    buzzer.setCollisionDetection(configuration: .enabled)
+                    buzzer.onCollisionDetected = { collisionData in
+                        self.test()
+                        player.play()
+                    }
+                }
+            }
+            
+            if let joystickDrone = SharedToyBox.instance.getBoltDetailsByTypeAndActivity(type: "joystick", activity: "bird") {
+                if let joystick = SharedToyBox.instance.getBoltByIdentifier(identifier: joystickDrone.UUID) {
+                    joystick.setFrontLed(color: .green)
+                    joystick.sensorControl.enable(sensors: SensorMask.init(arrayLiteral: .accelerometer,.gyro))
+                    joystick.sensorControl.interval = 1
+                    joystick.setStabilization(state: SetStabilization.State.off)
+                    joystick.sensorControl.onDataReady = { data in
+                        DispatchQueue.main.async { [self] in
+                            if let accelerometer = data.accelerometer {
+                                if let acceleration = accelerometer.filteredAcceleration {
+                                    if let x = acceleration.x, let y = acceleration.y {
+                                        let datasConverted = JoystickSparkInterpreter.convert(x: x, y: y, currentPos: self.limitPos)
+                                        self.updatePosition(newX: datasConverted.newX, newY: datasConverted.newY, action: datasConverted.action)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            hideBirds()
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
+    
+    func test () {
+        DispatchQueue.main.async {
+            self.flashView.isHidden = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                self.flashView.isHidden = true
+            }
+        }
+    }
+    
+    func updatePosition (newX: Int, newY: Int, action: Movement.Direction) {
+        if (isAllowToMove) {
+            if newY == 2 || newX == 2 || newY == -2 || newX == -2 {
+                return
+            }
+            
+            if limitPos != (newX, newY) {
+                limitPos = (newX, newY)
+                print(limitPos)
+                print(realPos)
+                isAllowToMove = false
+                
+                if let mySpark = spark {
+                    switch action {
+                        case Movement.Direction.front:
+                            mySpark.mobileRemoteController?.rightStickVertical = 0.3
+                            if (realPos.y - 500 >= 0) {
+                                realPos = (realPos.x, realPos.y - 500)
+                                self.myScrollView.setContentOffset(CGPoint(x: realPos.x, y: realPos.y), animated: true)
+                            }
+                        case Movement.Direction.back:
+                            mySpark.mobileRemoteController?.rightStickVertical = -0.3
+                            realPos = (realPos.x, realPos.y + 500)
+                            self.myScrollView.setContentOffset(CGPoint(x: realPos.x, y: realPos.y), animated: true)
+                        case Movement.Direction.left:
+                            mySpark.mobileRemoteController?.rightStickHorizontal = -0.3
+                            if (realPos.x - 500 >= 0) {
+                                realPos = (realPos.x - 500, realPos.y)
+                                self.myScrollView.setContentOffset(CGPoint(x: realPos.x, y: realPos.y), animated: true)
+                            }
+                        case Movement.Direction.right:
+                            mySpark.mobileRemoteController?.rightStickHorizontal = 0.3
+                            realPos = (realPos.x + 500, realPos.y)
+                            self.myScrollView.setContentOffset(CGPoint(x: realPos.x, y: realPos.y), animated: true)
+                        case Movement.Direction.nothing:
+                            self.stop()
+                        default:
+                            return
+                    }
+                }
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                    self.stop()
+                }
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                    self.isAllowToMove = true
+                }
+            }
+        }
+    }
+    
+    func hideBirds () {
+        if (index <= 12) {
+            print("akiloas \(akialoas)")
+            var images = self.akialoas.filter { $0.tag == index}
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 8.0) {
+                for image in images {
+                    image.isHidden = true
+                }
+                self.index = self.index + 1
+                self.hideBirds()
+            }
+        }
+    }
+    
+    @IBAction func stop(_ sender: UIButton) {
+        self.stop()
+    }
+    
+    @IBAction func decoller(_ sender: UIButton) {
+        print("take off")
+        GimbalManager.shared.lookUnder()
+        if let mySpark = DJISDKManager.product() as? DJIAircraft {
+            self.myScrollView.setContentOffset(CGPoint(x: realPos.x, y: realPos.y), animated: true)
+            if let flightController = mySpark.flightController {
+                flightController.startTakeoff(completion: { (err) in
+                    print(err.debugDescription)
+                })
+            }
+        }
+        let h: CGFloat = cameraView.frame.size.height
+        let w: CGFloat = cameraView.frame.size.width
+        let scale: CGFloat = 1.7
+        
+        self.myScrollView.setContentOffset(CGPoint(x: realPos.x, y: realPos.y), animated: true)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+            UIView.animate(withDuration: 2.0, delay: 0, options: [.curveEaseInOut], animations: {
+                self.cameraView.transform = self.cameraView.transform.scaledBy(x: scale, y: scale)
+            }, completion: { finish in })
+        }
+    }
+
+    @IBAction func atterrir(_ sender: UIButton) {
+        print("landing ")
+        if let mySpark = DJISDKManager.product() as? DJIAircraft {
+            if let flightController = mySpark.flightController {
+                flightController.startLanding(completion: { (err) in
+                    print(err.debugDescription)
+                })
+            }
+        }
+    }
+    
+    func stop () {
+        print("stop")
+        if let mySpark = spark {
+            mySpark.mobileRemoteController?.leftStickVertical = 0.0
+            mySpark.mobileRemoteController?.leftStickHorizontal = 0.0
+            mySpark.mobileRemoteController?.rightStickHorizontal = 0.0
+            mySpark.mobileRemoteController?.rightStickVertical = 0.0
+        }
     }
     
     override public var shouldAutorotate: Bool {
       return false
     }
+    
     override public var supportedInterfaceOrientations: UIInterfaceOrientationMask {
       return .landscapeRight
     }
+    
     override public var preferredInterfaceOrientationForPresentation: UIInterfaceOrientation {
       return .landscapeRight
     }
   
-    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         if let _ = DJISDKManager.product() {
             if let camera = self.getCamera(){
                 camera.delegate = self
+                cameraView.pinEdges(to: view)
                 self.setupVideoPreview()
             }
             
             GimbalManager.shared.setup(withDuration: 1.0, defaultPitch: -28.0)
             GimbalManager.shared.lookUnder()
 
-            cameraView.pinEdges(to: view)
-            birdView.backgroundColor = .clear
             
-            let h: CGFloat = cameraView.frame.size.height
-            let w: CGFloat = cameraView.frame.size.width
-            let scale: CGFloat = 3.5
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { // Change `2.0` to the desired number of seconds.
-                UIView.animate(withDuration: 2.0, delay: 0, options: [.curveEaseInOut], animations: {
-                    self.cameraView.transform = self.cameraView.transform.scaledBy(x: scale, y: scale)
-                    self.cameraView.center = CGPoint(x: w/scale/2, y: h/scale/2)
-                }, completion: { finish in })
-            }
-           
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) { // Change `2.0` to the desired number of seconds.
-                self.birdView.isHidden = false
-            }
         }
     }
 
@@ -221,6 +403,7 @@ class CameraViewController: UIViewController {
 extension CameraViewController:DJIVideoFeedListener {
     func videoFeed(_ videoFeed: DJIVideoFeed, didUpdateVideoData videoData: Data) {
 //        print([UInt8](videoData).count)
+        
         videoData.withUnsafeBytes { (bytes:UnsafePointer<UInt8>) in
             prev1?.push(UnsafeMutablePointer(mutating: bytes), length: Int32(videoData.count))
             prev2?.push(UnsafeMutablePointer(mutating: bytes), length: Int32(videoData.count))

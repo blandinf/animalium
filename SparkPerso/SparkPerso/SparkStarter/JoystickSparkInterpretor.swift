@@ -19,14 +19,14 @@ class JoystickSparkInterpreter {
     
     static func convert (x: Double, y: Double, currentPos: (x: Int, y: Int)) -> (newX: Int, newY: Int, action: Movement.Direction) {
         
-        let xIsEmpty: Bool = x < Steps.high.rawValue && x > -Steps.high.rawValue
-        let yIsEmpty: Bool = y < Steps.high.rawValue && y > -Steps.high.rawValue
+        let xIsEmpty: Bool = x < Steps.low.rawValue && x > -Steps.low.rawValue
+        let yIsEmpty: Bool = y < Steps.low.rawValue && y > -Steps.low.rawValue
         var newX = 0
         var newY = 0
         var action = Movement.Direction.nothing
         
         if (!xIsEmpty && yIsEmpty) {
-            if x > Steps.high.rawValue {
+            if x > Steps.low.rawValue {
                 newX = currentPos.x - 1
                 newY = currentPos.y
                 action = Movement.Direction.left
@@ -36,7 +36,7 @@ class JoystickSparkInterpreter {
                 action = Movement.Direction.right
             }
         } else if (!yIsEmpty && xIsEmpty) {
-            if y > Steps.high.rawValue {
+            if y > Steps.low.rawValue {
                 newX = currentPos.x
                 newY = currentPos.y - 1
                 action = Movement.Direction.back

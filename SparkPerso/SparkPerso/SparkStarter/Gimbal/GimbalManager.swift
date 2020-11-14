@@ -13,7 +13,7 @@ public class GimbalManager {
     
     var gimbal: DJIGimbal?
     var front:Float = 90.0
-    var under:Float = -90.0
+    var under:Float = -60.0
     var defaultPitch: NSNumber = 0
     private var speed: TimeInterval?
     var ready = false
