@@ -107,6 +107,8 @@
 		61EDDB1F2359BC92008B3636 /* SpheroMovementManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61EDDB1E2359BC92008B3636 /* SpheroMovementManager.swift */; };
 		61F339AB23250521000967B2 /* SpheroStatusViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61F339AA23250521000967B2 /* SpheroStatusViewController.swift */; };
 		AD14D44B252CFCB300FEBD46 /* JoystickSpheroInterpreter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD14D44A252CFCB300FEBD46 /* JoystickSpheroInterpreter.swift */; };
+		AD505A5125376B0300BEF102 /* ScrollViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD505A5025376B0300BEF102 /* ScrollViewController.swift */; };
+		AD58D6E32540165200A12E04 /* picture.wav in Resources */ = {isa = PBXBuildFile; fileRef = AD58D6E22540165200A12E04 /* picture.wav */; };
 		ADAF187D252E321800A5874A /* JoystickSparkInterpretor.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADAF187C252E321800A5874A /* JoystickSparkInterpretor.swift */; };
 		ADAF1885252F259F00A5874A /* viewWholeSceen.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADAF1884252F259F00A5874A /* viewWholeSceen.swift */; };
 		ADAF188A252F9FE400A5874A /* bolt_details.json in Resources */ = {isa = PBXBuildFile; fileRef = ADAF1889252F9FE400A5874A /* bolt_details.json */; };
@@ -256,6 +258,8 @@
 		61F339AA23250521000967B2 /* SpheroStatusViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpheroStatusViewController.swift; sourceTree = "<group>"; };
 		9574723689CDFD5A62E8841B /* Pods_SparkPerso.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SparkPerso.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AD14D44A252CFCB300FEBD46 /* JoystickSpheroInterpreter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoystickSpheroInterpreter.swift; sourceTree = "<group>"; };
+		AD505A5025376B0300BEF102 /* ScrollViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollViewController.swift; sourceTree = "<group>"; };
+		AD58D6E22540165200A12E04 /* picture.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = picture.wav; sourceTree = "<group>"; };
 		ADAF187C252E321800A5874A /* JoystickSparkInterpretor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoystickSparkInterpretor.swift; sourceTree = "<group>"; };
 		ADAF1884252F259F00A5874A /* viewWholeSceen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = viewWholeSceen.swift; sourceTree = "<group>"; };
 		ADAF1889252F9FE400A5874A /* bolt_details.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = bolt_details.json; sourceTree = "<group>"; };
@@ -339,6 +343,7 @@
 				61D50D7120274586000842A3 /* AccelerometerViewController.swift */,
 				618F61D5204064C900CAE2A3 /* Scenar.json */,
 				ADAF187C252E321800A5874A /* JoystickSparkInterpretor.swift */,
+				AD505A5025376B0300BEF102 /* ScrollViewController.swift */,
 			);
 			path = SparkStarter;
 			sourceTree = "<group>";
@@ -645,6 +650,7 @@
 		ADAF1888252F9FD400A5874A /* datas */ = {
 			isa = PBXGroup;
 			children = (
+				AD58D6E22540165200A12E04 /* picture.wav */,
 				ADAF1889252F9FE400A5874A /* bolt_details.json */,
 				ADAF188E252FA2F900A5874A /* BoltDetails.swift */,
 			);
@@ -793,6 +799,7 @@
 				61DAFC17200B9AB3001CB2E2 /* LaunchScreen.storyboard in Resources */,
 				61DAFC14200B9AB3001CB2E2 /* Assets.xcassets in Resources */,
 				ADAF188A252F9FE400A5874A /* bolt_details.json in Resources */,
+				AD58D6E32540165200A12E04 /* picture.wav in Resources */,
 				618F61D6204064C900CAE2A3 /* Scenar.json in Resources */,
 				61DAFC12200B9AB3001CB2E2 /* Main.storyboard in Resources */,
 			);
@@ -908,6 +915,7 @@
 				61C3D67B231BF82F00F98C11 /* MiniToy.swift in Sources */,
 				6117016021F60CB4009F47E4 /* UIImage+CVPixelBuffer.swift in Sources */,
 				611ACD7523589558001EDB7E /* TP1ViewController.swift in Sources */,
+				AD505A5125376B0300BEF102 /* ScrollViewController.swift in Sources */,
 				61C3D671231BF82F00F98C11 /* SensorControlV1.swift in Sources */,
 				61C3D682231BF82F00F98C11 /* CommandSequencerV2.swift in Sources */,
 				61EDDB1B2359BC62008B3636 /* GenericMovementManager.swift in Sources */,
@@ -1145,7 +1153,7 @@
 				INFOPLIST_FILE = SparkPerso/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.sparkperso.blandinf2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sparkperso.blandinf3;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -1167,7 +1175,7 @@
 				INFOPLIST_FILE = SparkPerso/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.sparkperso.blandinf2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sparkperso.blandinf3;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = 1;
